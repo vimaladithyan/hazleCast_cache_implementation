@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast xmlns="http://www.hazelcast.com/schema/config"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.hazelcast.com/schema/config
+                               https://www.hazelcast.com/schema/config/hazelcast-config-5.4.xsd">
+
+    <cluster-name>ecommerce-hazelcast-cluster</cluster-name>
+    <instance-name>ecommerce-hazelcast</instance-name>
+
+    <properties>
+        <!-- Do not send usage data to Hazelcast from a local learning project -->
+        <property name="hazelcast.phone.home.enabled">false</property>
+        <!-- Keep the demo output focused on SQL and cache statistics -->
+        <property name="hazelcast.logging.type">none</property>
+    </properties>
+
+    <network>
+        <!-- Port auto-increment lets a second instance join on 5702 -->
+        <port auto-increment="true" port-count="10">5701</port>
+
+        <join>
+            <auto-detection enabled="false"/>
+            <multicast enabled="false"/>
+            <tcp-ip enabled="true">
+                <member>127.0.0.1:5701</member>
+            </tcp-ip>
+        </join>
+    </network>
+
+    <!-- Hibernate entity region for Product -->
+    <cache name="productCache">
+        <statistics-enabled>true</statistics-enabled>
+        <backup-count>1</backup-count>
+        <async-backup-count>0</async-backup-count>
+        <eviction eviction-policy="LRU" max-size-policy="ENTRY_COUNT" size="1000"/>
+        <expiry-policy-factory>
+            <timed-expiry-policy-factory expiry-policy-type="CREATED"
+                                        duration-amount="600"
+                                        time-unit="SECONDS"/>
+        </expiry-policy-factory>
+    </cache>
+
+    <!-- Hazle package entity region -->
+    <cache name="hazleProductCache">
+        <statistics-enabled>true</statistics-enabled>
+        <backup-count>1</backup-count>
+        <async-backup-count>0</async-backup-count>
+        <eviction eviction-policy="LRU" max-size-policy="ENTRY_COUNT" size="1000"/>
+        <expiry-policy-factory>
+            <timed-expiry-policy-factory expiry-policy-type="CREATED"
+                                        duration-amount="600"
+                                        time-unit="SECONDS"/>
+        </expiry-policy-factory>
+    </cache>
+
+    <!-- Hibernate query-result cache region -->
+    <cache name="default-query-results-region">
+        <statistics-enabled>true</statistics-enabled>
+        <backup-count>1</backup-count>
+        <eviction eviction-policy="LRU" max-size-policy="ENTRY_COUNT" size="1000"/>
+        <expiry-policy-factory>
+            <timed-expiry-policy-factory expiry-policy-type="CREATED"
+                                        duration-amount="120"
+                                        time-unit="SECONDS"/>
+        </expiry-policy-factory>
+    </cache>
+
+    <!-- Timestamps must not expire while the query cache is alive -->
+    <cache name="default-update-timestamps-region">
+        <statistics-enabled>true</statistics-enabled>
+        <backup-count>1</backup-count>
+        <eviction eviction-policy="LRU" max-size-policy="ENTRY_COUNT" size="10000"/>
+        <expiry-policy-factory>
+            <timed-expiry-policy-factory expiry-policy-type="ETERNAL"/>
+        </expiry-policy-factory>
+    </cache>
+
+</hazelcast>
